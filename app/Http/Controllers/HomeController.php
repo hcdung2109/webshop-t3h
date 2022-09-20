@@ -187,16 +187,18 @@ class HomeController extends Controller
 
         //$totalResult = $products->total(); // số lượng kết quả tìm kiếm
 
-        $page = $request->input('page', 1);
-        $paginate = 5;
+        $page = $request->input('page') ?? 1;
+        $paginate = 4;
+        $offSet = ($page * $paginate) - $paginate;
 
-        $products = Product::searchByQuery(['match' => ['name' => $keyword]], null, null, $paginate, $page);
+        $products = Product::searchByQuery(['match' => ['name' => $keyword]], null, null, $paginate, $offSet);
         $totalResult = $products->totalHits();
         $totalResult = $totalResult['value'];
-        // $offSet = ($page * $paginate) - $paginate;
-        $itemsForCurrentPage = $products->toArray();
-        $products = new \Illuminate\Pagination\LengthAwarePaginator($itemsForCurrentPage, $totalResult, $paginate, $page);
+       
+        $products = new \Illuminate\Pagination\LengthAwarePaginator($products, $totalResult, $paginate, $page);
         $products->setPath('tim-kiem');
+        
+  
 
         return view('frontend.search', [
             'products' => $products,
